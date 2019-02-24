@@ -1,0 +1,3 @@
+[submodule "libStrOfInt"]
+	path = depend/raymai/StrOfInt
+	url = https://github.com/Raymai97/libStrOfInt.git
