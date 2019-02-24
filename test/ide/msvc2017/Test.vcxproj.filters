@@ -1,0 +1,33 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="Impl">
+      <UniqueIdentifier>{b2362f43-ceb3-4a35-a247-0609fa54bf9b}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Test">
+      <UniqueIdentifier>{c75738b3-912f-4fe4-ad54-7d5ee2b5841c}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="..\..\..\impl\client.h">
+      <Filter>Impl</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\base.h">
+      <Filter>Test</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\ErrText.h">
+      <Filter>Test</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="..\..\src\main.c">
+      <Filter>Test</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\w32.c">
+      <Filter>Test</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\std.c">
+      <Filter>Test</Filter>
+    </ClCompile>
+  </ItemGroup>
+</Project>
