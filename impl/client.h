@@ -11,9 +11,17 @@
 	There are 5 standard flags. My implementation supports all of them
 	except '#' flag as I personally despise its behavior.
 
-	Width and precision are implemented according to the standard.
-	For integer, width = minimum strlen, preci = minimum digit count.
-	For string, width = minimum strlen, preci = maximum strlen.
+	Width and precision are implemented according to the C standard.
+	|- For string:
+	| > width = minimum strlen
+	| > preci = maximum strlen
+	|
+	|- For integer:
+	| > width = minimum strlen
+	| > preci = minimum digit count
+	| >> If no preci dot, it prints ((int)0) as "0".
+	| >> Else if preci is 0, it prints ((int)0) as "".
+	| >> "%.d" are consider equivalent to "%.0d".
 
 	Length sub-specifier modifies the length of specifier's data type.
 	For integer, all C99 standard ones are implemented:
@@ -479,7 +487,7 @@ static int raymai_printf__impl(
 				(*p == 'x' || *p == 'X') ? 16 : 10;
 			rUIntMax theInt = 0;
 			enum { MaxSzInt = 99 };
-			rChar szInt[MaxSzInt] = { 0 }, *pszInt = NULL;
+			rChar szInt[MaxSzInt] = { 0 };
 			rChar signChar = 0, *q = NULL;
 			int iIntStr = 0, nDigit = 0;
 			/* get the int and convert to string */
@@ -529,10 +537,9 @@ static int raymai_printf__impl(
 			if (iIntStr < 0) {
 				err = RaymaiPrintf_Err_Unexpected; goto eof;
 			}
-			pszInt = szInt;
 			/* for signed type */
 			if (isSigned) {
-				if (pszInt[0] == '-') {
+				if (szInt[0] == '-') {
 					signChar = '-';
 				}
 				else if (flags & fPositiveSign) {
@@ -543,27 +550,21 @@ static int raymai_printf__impl(
 				}
 			}
 			/* for lowercase hex */
-			else if (*p == 'x') for (q = pszInt; *q; ++q) {
+			else if (*p == 'x') for (q = szInt; *q; ++q) {
 				if (*q >= 'A' && *q <= 'Z') { *q += 'a' - 'A'; }
 			}
 			/* find number of digit */
-			for (nDigit = 0; pszInt[nDigit]; ++nDigit);
-			/* remove the negative sign, if any */
-			if (pszInt[0] == '-') {
-				--nDigit; ++pszInt;
+			if (theInt == 0 && (flags & fMetPreciDot) && preci == 0) {
+				nDigit = 0;
 			}
-			/* preci = minimum number of digit */
-			/* if n < preci, ++n until n == preci */
-			if ((flags & fMetPreciDot) && nDigit < preci) {
-				preci -= nDigit;
-				while (preci-- > 0) {
-					*(--pszInt) = '0'; ++nDigit;
-				}
+			else {
+				for (nDigit = 0; szInt[nDigit]; ++nDigit);
+				if (szInt[0] == '-') { --nDigit; }
 			}
 			/* width = mininum strlen */
-			width -= nDigit + (signChar ? 1 : 0);
+			width -= ((preci > nDigit) ? preci : nDigit) + (signChar ? 1 : 0);
 			if ((flags & fLeftAlign) == 0) {
-				if (flags &fPadWithZero) {
+				if ((flags & fPadWithZero) && (flags & fMetPreciDot) == 0) {
 					if (signChar) { H__Consume(signChar); signChar = 0; }
 					while (width-- > 0) { H__Consume('0'); }
 				}
@@ -572,7 +573,13 @@ static int raymai_printf__impl(
 				}
 			}
 			if (signChar) { H__Consume(signChar); }
-			for (q = pszInt; *q; ++q) { H__Consume(*q); }
+			/* preci = minimum number of digit */
+			preci -= nDigit;
+			while (preci-- > 0) { H__Consume('0'); }
+			if (nDigit > 0) {
+				q = (szInt[0] == '-') ? &szInt[1] : szInt;
+				for (; *q; ++q) { H__Consume(*q); }
+			}
 			while (width-- > 0) { H__Consume(' '); }
 			H__ResetSpec;
 		}

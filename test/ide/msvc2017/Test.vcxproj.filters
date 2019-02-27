@@ -18,6 +18,15 @@
     <ClInclude Include="..\..\src\ErrText.h">
       <Filter>Test</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\src\std_0.h">
+      <Filter>Test</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\w32_0.h">
+      <Filter>Test</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\std_d.h">
+      <Filter>Test</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\..\src\main.c">
