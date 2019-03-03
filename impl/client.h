@@ -150,6 +150,8 @@ typedef int(*RaymaiPrintf_ColonEx_Handler)(
 enum RaymaiPrintf_Err {
 	/* Failed to output to buffer or file */
 	RaymaiPrintf_Err_Put = INT_MIN,
+	/* Failed to allocate memory for (v)asprintf */
+	RaymaiPrintf_Err_Malloc,
 	/* Unexpected char in format string */
 	RaymaiPrintf_Err_Char,
 	/* Unexpected end of format string */
@@ -994,15 +996,15 @@ static int raymai_vasprintf(
 	va_copy(ap2, ap);
 	cch = raymai_printf__cch(pszFmt, ap);
 	if (cch >= 0) {
-		rPStr pszOut = RAYMAI_PRINTF_MALLOC0((cch + 1) * sizeof(rChar));
-		if (pszOut) {
-			H__Self_asprintf self = { 0 };
-			self.pszOut = pszOut;
-			cch = raymai_printf__put(pszFmt, ap2,
+		H__Self_asprintf self = { 0 };
+		self.pszOut = RAYMAI_PRINTF_MALLOC0((cch + 1) * sizeof(rChar));
+		if (self.pszOut == NULL) {
+			cch = RaymaiPrintf_Err_Malloc;
+		}
+		else {
+			raymai_printf__put(pszFmt, ap2,
 				raymai_asprintf__putc, &self);
-			if (cch >= 0) {
-				*ppszOut = pszOut;
-			}
+			*ppszOut = self.pszOut;
 		}
 	}
 	va_end(ap2);
