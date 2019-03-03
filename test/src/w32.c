@@ -1,8 +1,10 @@
 #include "w32_0.h"
 
+static BOOL s_MallocOff;
+
 static void * MemAllocZero(SIZE_T cb)
 {
-	return HeapAlloc(GetProcessHeap(), HEAP_ZERO_MEMORY, cb);
+	return s_MallocOff ? NULL : HeapAlloc(GetProcessHeap(), HEAP_ZERO_MEMORY, cb);
 }
 
 static void MemFree(void *ptr)
@@ -275,6 +277,13 @@ static void My_TestBegin(HWND hwnd)
 		"\xA5 Yen dollar, \xA9 Copyright, \xAE Reserved";
 	PCWSTR const psz1252W =
 		L"\x00A5 Yen dollar, \x00A9 Copyright, \x00AE Reserved";
+	{
+		PTSTR pszTmp = NULL;
+		s_MallocOff = TRUE;
+		assert(raymai_asprintf(&pszTmp, "123") == RaymaiPrintf_Err_Malloc);
+		assert(pszTmp == NULL);
+		s_MallocOff = FALSE;
+	}
 
 	MyLogf(hwnd, "\nsource: US CP1252");
 	MyLogf(hwnd, "%%:ansi:s = %:ansi:s", psz1252A);
